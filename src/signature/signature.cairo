@@ -29,6 +29,7 @@ pub trait BaseSigVerifierTrait {
         ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray
     ) -> Result<BaseSigVerifier, felt252>;
     fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool;
+    fn new_verify(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> bool;
 }
 
 impl BaseSigVerifierImpl of BaseSigVerifierTrait {
@@ -37,7 +38,7 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
     ) -> Result<BaseSigVerifier, felt252> {
         let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
         let sub_script = vm.sub_script();
-        Result::Ok(BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type, })
+        Result::Ok(BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type })
     }
 
     // TODO: add signature cache mechanism for optimization
@@ -48,6 +49,23 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
         );
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
+    }
+
+    // Construct BaseSigVerifier and verify. Return 'false' if construction fail
+    fn new_verify(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> bool {
+        let (pub_key, sig, hash_type) = match parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes) {
+            Result::Ok((pk, s, ht)) => (pk, s, ht),
+            Result::Err(_) => { return false; }
+        };
+        let sub_script = vm.sub_script();
+        let mut verifier = BaseSigVerifier {
+            pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type
+        };
+        let sub_script: @ByteArray = remove_signature(@verifier.sub_script, verifier.sig_bytes);
+        let sig_hash: u256 = sighash::calc_signature_hash(
+            sub_script, verifier.hash_type, ref vm.transaction, vm.tx_idx
+        );
+        is_valid_signature(sig_hash, verifier.sig.r, verifier.sig.s, verifier.pub_key)
     }
 }
 
