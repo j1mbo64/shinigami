@@ -69,7 +69,9 @@ pub fn check_expected_astack(ref engine: Engine, expected: Span<ByteArray>) {
     assert_eq!(astack, expected, "Astack is not as expected");
 }
 
-pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
+// Mock transaction '1d5308ff12cb6fdb670c3af673a6a1317e21fa14fc863d5827f9d704cd5e14dc'
+// Legacy P2PKH
+pub fn mock_transaction_legacy_p2pkh(script_sig: ByteArray) -> Transaction {
     let outpoint_0: OutPoint = OutPoint {
         hash: 0xb7994a0db2f373a29227e1d90da883c6ce1cb0dd2d6812e4558041ebbbcfa54b, index: 0
     };
@@ -89,7 +91,7 @@ pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
     oscript_byte.append_word(oscript_u256.high.into(), 9);
     oscript_byte.append_word(oscript_u256.low.into(), 16);
 
-    //little endian to i64 handle
+    // Little endian to i64 handle
     let output_0: TransactionOutput = TransactionOutput {
         value: 15000, publickey_script: oscript_byte
     };
@@ -108,6 +110,46 @@ pub fn mock_transaction(script_sig: ByteArray) -> Transaction {
     }
 }
 
+// Mock transaction '949591ad468cef5c41656c0a502d9500671ee421fadb590fbc6373000039b693'
+// Legacy P2MS
+pub fn mock_transaction_legacy_p2ms(script_sig: ByteArray) -> Transaction {
+    let outpoint_0: OutPoint = OutPoint {
+        hash: 0x581d30e2a73a2db683ac2f15d53590bd0cd72de52555c2722d9d6a78e9fea510, index: 0
+    };
+    let mut compiler = CompilerImpl::new();
+    let mut script_sig = compiler.compile(script_sig);
+    let transaction_input_0: TransactionInput = TransactionInput {
+        previous_outpoint: outpoint_0,
+        signature_script: script_sig,
+        witness: ArrayTrait::<ByteArray>::new(),
+        sequence: 0xffffffff
+    };
+    let mut transaction_inputs: Array<TransactionInput> = ArrayTrait::<TransactionInput>::new();
+    transaction_inputs.append(transaction_input_0);
+    let oscript_u256: u256 = 0x76a914971802edf585cdbc4e57017d6e5142515c1e502888ac;
+    let mut oscript_byte: ByteArray = "";
+
+    oscript_byte.append_word(oscript_u256.high.into(), 9);
+    oscript_byte.append_word(oscript_u256.low.into(), 16);
+
+    // Little endian to i64 handle
+    let output_0: TransactionOutput = TransactionOutput {
+        value: 1680000, publickey_script: oscript_byte
+    };
+    let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<TransactionOutput>::new();
+    transaction_outputs.append(output_0);
+
+    //let mut subscript = hex_to_bytecode(
+    //    @"0x76a9144299ff317fcd12ef19047df66d72454691797bfc88ac"
+    //);
+
+    Transaction {
+        version: 1,
+        transaction_inputs: transaction_inputs.span(),
+        transaction_outputs: transaction_outputs.span(),
+        locktime: 0,
+    }
+}
 pub fn mock_witness_transaction() -> Transaction {
     let outpoint_0: OutPoint = OutPoint {
         hash: 0xac4994014aa36b7f53375658ef595b3cb2891e1735fe5b441686f5e53338e76a, index: 1
@@ -126,7 +168,7 @@ pub fn mock_witness_transaction() -> Transaction {
     script_byte.append_word(script_u256.high.into(), 9);
     script_byte.append_word(script_u256.low.into(), 16);
 
-    //little endian to i64 handle
+    // Little endian to i64 handle
     let output_0: TransactionOutput = TransactionOutput {
         value: 15000, publickey_script: script_byte
     };

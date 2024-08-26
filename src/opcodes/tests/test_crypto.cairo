@@ -258,7 +258,7 @@ fn test_op_checksig_valid() {
         "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
     let script_pubkey =
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
-    let mut transaction = utils::mock_transaction(script_sig);
+    let mut transaction = utils::mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = utils::test_compile_and_run_with_tx(script_pubkey, transaction);
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(1)];
@@ -271,7 +271,7 @@ fn test_op_checksig_wrong_signature() {
         "OP_DATA_71 0x3044022008f4f37e2d8f74f18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5801 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
     let script_pubkey =
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
-    let mut transaction = utils::mock_transaction(script_sig);
+    let mut transaction = utils::mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = utils::test_compile_and_run_with_tx_err(
         script_pubkey, transaction, Error::SCRIPT_FAILED
     );
@@ -286,7 +286,7 @@ fn test_op_checksig_invalid_hash_type() {
         "OP_DATA_71 0x3044022008f4f37e2d8f74e18c1b8fde2374d5f28402fb8ab7fd1cc5b786aa40851a70cb02201f40afd1627798ee8529095ca4b205498032315240ac322c9d8ff0f205a93a5807 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
     let script_pubkey =
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
-    let mut transaction = utils::mock_transaction(script_sig);
+    let mut transaction = utils::mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = utils::test_compile_and_run_with_tx_err(
         script_pubkey, transaction, Error::SCRIPT_FAILED
     );
@@ -301,7 +301,7 @@ fn test_op_checksig_empty_signature() {
         "OP_0 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
     let script_pubkey =
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
-    let mut transaction = utils::mock_transaction(script_sig);
+    let mut transaction = utils::mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = utils::test_compile_and_run_with_tx_err(
         script_pubkey, transaction, Error::SCRIPT_FAILED
     );
@@ -316,7 +316,7 @@ fn test_op_checksig_too_short_signature() {
         "OP_1 OP_DATA_33 0x024aeaf55040fa16de37303d13ca1dde85f4ca9baa36e2963a27a1c0c1165fe2b1";
     let script_pubkey =
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
-    let mut transaction = utils::mock_transaction(script_sig);
+    let mut transaction = utils::mock_transaction_legacy_p2pkh(script_sig);
     let mut engine = utils::test_compile_and_run_with_tx_err(
         script_pubkey, transaction, 'invalid sig fmt: too short'
     );
@@ -389,7 +389,7 @@ fn test_op_checkmultisig_valid() {
         "OP_0 OP_DATA_72 0x3045022100AF204EF91B8DBA5884DF50F87219CCEF22014C21DD05AA44470D4ED800B7F6E40220428FE058684DB1BB2BFB6061BFF67048592C574EFFC217F0D150DAEDCF36787601 OP_DATA_72 0x3045022100E8547AA2C2A2761A5A28806D3AE0D1BBF0AEFF782F9081DFEA67B86CACB321340220771A166929469C34959DAF726A2AC0C253F9AFF391E58A3C7CB46D8B7E0FDC4801";
     let script_pubkey =
         "OP_2 OP_DATA_65 0x04D81FD577272BBE73308C93009EEC5DC9FC319FC1EE2E7066E17220A5D47A18314578BE2FAEA34B9F1F8CA078F8621ACD4BC22897B03DAA422B9BF56646B342A2 OP_DATA_65 0x04EC3AFFF0B2B66E8152E9018FE3BE3FC92B30BF886B3487A525997D00FD9DA2D012DCE5D5275854ADC3106572A5D1E12D4211B228429F5A7B2F7BA92EB0475BB1 OP_DATA_65 0x04B49B496684B02855BC32F5DAEFA2E2E406DB4418F3B86BCA5195600951C7D918CDBE5E6D3736EC2ABF2DD7610995C3086976B2C0C7B4E459D10B34A316D5A5E7 OP_3 OP_CHECKMULTISIG";
-    let mut transaction = utils::mock_transaction(script_sig);
+    let mut transaction = utils::mock_transaction_legacy_p2ms(script_sig);
     let mut engine = utils::test_compile_and_run_with_tx(script_pubkey, transaction);
     utils::check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(1)];

@@ -55,7 +55,9 @@ impl BaseSigVerifierImpl of BaseSigVerifierTrait {
     fn new_verify(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> bool {
         let (pub_key, sig, hash_type) = match parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes) {
             Result::Ok((pk, s, ht)) => (pk, s, ht),
-            Result::Err(_) => { return false; }
+            Result::Err(_) => { 
+			println!("TOTO");
+			return false; }
         };
         let sub_script = vm.sub_script();
         let mut verifier = BaseSigVerifier {
