@@ -26,47 +26,50 @@ pub struct BaseSigVerifier {
 
 pub trait BaseSigVerifierTrait {
     fn new(
-        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray
+        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>
     ) -> Result<BaseSigVerifier, felt252>;
     fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool;
-    fn new_verify(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> bool;
+    fn new_verify(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>) -> bool;
 }
 
 impl BaseSigVerifierImpl of BaseSigVerifierTrait {
     fn new(
-        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray
+        ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>
     ) -> Result<BaseSigVerifier, felt252> {
+        let mut sub_script = vm.sub_script();
+		for i in sigs_to_remove {
+			sub_script = remove_signature(@sub_script, i);
+		};
         let (pub_key, sig, hash_type) = parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes)?;
-        let sub_script = vm.sub_script();
         Result::Ok(BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type })
     }
 
     // TODO: add signature cache mechanism for optimization
     fn verify(ref self: BaseSigVerifier, ref vm: Engine) -> bool {
-        let sub_script: @ByteArray = remove_signature(@self.sub_script, self.sig_bytes);
         let sig_hash: u256 = sighash::calc_signature_hash(
-            sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
+            @self.sub_script, self.hash_type, ref vm.transaction, vm.tx_idx
         );
 
         is_valid_signature(sig_hash, self.sig.r, self.sig.s, self.pub_key)
     }
 
     // Construct BaseSigVerifier and verify. Return 'false' if construction fail
-    fn new_verify(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray) -> bool {
+    fn new_verify(ref vm: Engine, sig_bytes: @ByteArray, pk_bytes: @ByteArray, sigs_to_remove: Span<ByteArray>) -> bool {
+        let mut sub_script = vm.sub_script();
+		println!("LEN {}", sub_script);
+		for i in sigs_to_remove {
+			sub_script = remove_signature(@sub_script, i);
+		};
+		println!("LEN {}", sub_script);
         let (pub_key, sig, hash_type) = match parse_base_sig_and_pk(ref vm, pk_bytes, sig_bytes) {
             Result::Ok((pk, s, ht)) => (pk, s, ht),
-            Result::Err(_) => { 
-			println!("TOTO");
-			return false; }
+            Result::Err(_) => { return false; }
         };
-        let sub_script = vm.sub_script();
-        let mut verifier = BaseSigVerifier {
-            pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type
-        };
-        let sub_script: @ByteArray = remove_signature(@verifier.sub_script, verifier.sig_bytes);
+        let verifier = BaseSigVerifier { pub_key, sig, sig_bytes, pk_bytes, sub_script, hash_type };
         let sig_hash: u256 = sighash::calc_signature_hash(
-            sub_script, verifier.hash_type, ref vm.transaction, vm.tx_idx
+            @verifier.sub_script, verifier.hash_type, ref vm.transaction, vm.tx_idx
         );
+
         is_valid_signature(sig_hash, verifier.sig.r, verifier.sig.s, verifier.pub_key)
     }
 }
@@ -307,12 +310,37 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
 // This function extracts the `r` and `s` values from a DER-encoded ECDSA signature (`sig_bytes`).
 // The function performs various checks to ensure the integrity and validity of the signature.
 pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
-    let sig_len: usize = sig_bytes.len() - constants::HASH_TYPE_LEN;
-    let r_len: usize = sig_bytes[3].into();
-    let s_len: usize = sig_bytes[r_len + 5].into();
-    let r_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, 4, r_len);
-    let s_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, 6 + r_len, s_len);
+    let mut sig_len: usize = sig_bytes.len() - constants::HASH_TYPE_LEN;
+    let mut r_len: usize = sig_bytes[3].into();
+    let mut s_len: usize = sig_bytes[r_len + 5].into();
+    let mut r_offset = 4;
+    let mut s_offset = 6 + r_len;
     let order: u256 = Secp256Trait::<Secp256k1Point>::get_curve_size();
+
+    let mut i = 0;
+
+    //Strip leading zero
+    while s_len > 0 && sig_bytes[i + r_len + 6] == 0x00 {
+        sig_len -= 1;
+        s_len -= 1;
+        s_offset += 1;
+        i += 1;
+    };
+
+    let s_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, s_offset, s_len);
+
+    i = 0;
+
+    while r_len > 0 && sig_bytes[i + 4] == 0x00 {
+        sig_len -= 1;
+        r_len -= 1;
+        r_offset += 1;
+        i += 1;
+    };
+
+    let r_sig: u256 = u256_from_byte_array_with_offset(sig_bytes, r_offset, r_len);
+
+
 
     if r_len > 32 {
         return Result::Err('invalid sig: R > 256 bits');
@@ -366,11 +394,10 @@ pub fn parse_base_sig_and_pk(
 
     Result::Ok((pub_key, sig, hash_type))
 }
-
 // Removes the ECDSA signature from a given script.
-pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray {
+fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> ByteArray {
     if script.len() == 0 || sig_bytes.len() == 0 {
-        return script;
+        return Default::default();
     }
 
     let mut processed_script: ByteArray = "";
@@ -406,5 +433,5 @@ pub fn remove_signature(script: @ByteArray, sig_bytes: @ByteArray) -> @ByteArray
         i += 1;
     };
 
-    @processed_script
+    processed_script
 }

@@ -98,10 +98,6 @@ pub fn mock_transaction_legacy_p2pkh(script_sig: ByteArray) -> Transaction {
     let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<TransactionOutput>::new();
     transaction_outputs.append(output_0);
 
-    //let mut subscript = hex_to_bytecode(
-    //    @"0x76a9144299ff317fcd12ef19047df66d72454691797bfc88ac"
-    //);
-
     Transaction {
         version: 1,
         transaction_inputs: transaction_inputs.span(),
@@ -138,10 +134,6 @@ pub fn mock_transaction_legacy_p2ms(script_sig: ByteArray) -> Transaction {
     };
     let mut transaction_outputs: Array<TransactionOutput> = ArrayTrait::<TransactionOutput>::new();
     transaction_outputs.append(output_0);
-
-    //let mut subscript = hex_to_bytecode(
-    //    @"0x76a9144299ff317fcd12ef19047df66d72454691797bfc88ac"
-    //);
 
     Transaction {
         version: 1,

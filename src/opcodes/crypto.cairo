@@ -1,7 +1,7 @@
 use shinigami::engine::{Engine, EngineTrait};
 use shinigami::stack::ScriptStackTrait;
 use shinigami::scriptflags::ScriptFlags;
-use shinigami::signature::{BaseSigVerifier, BaseSigVerifierTrait};
+use shinigami::signature::signature::{BaseSigVerifier, BaseSigVerifierTrait};
 use core::sha256::compute_sha256_byte_array;
 use shinigami::opcodes::utils;
 use shinigami::errors::Error;
@@ -72,7 +72,7 @@ pub fn opcode_checksig(ref engine: Engine) -> Result<(), felt252> {
     // TODO: add witness context inside engine to check if witness is active
     //       if witness is active use BaseSigVerifier
     let mut is_valid: bool = false;
-    let mut sig_verifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes)?;
+    let mut sig_verifier = BaseSigVerifierTrait::new(ref engine, @full_sig_bytes, @pk_bytes, array![full_sig_bytes].span())?;
 
     if sig_verifier.verify(ref engine) {
         is_valid = true;
@@ -148,7 +148,7 @@ pub fn opcode_checkmultisig(ref engine: Engine) -> Result<(), felt252> {
 
     while valid_sigs.into() < num_sigs {
         match BaseSigVerifierTrait::new_verify(
-            ref engine, sigs.at(valid_sigs), pub_keys.at(keys_idx)
+            ref engine, sigs.at(valid_sigs), pub_keys.at(keys_idx), sigs.span()
         ) {
             true => {
                 valid_sigs += 1;
