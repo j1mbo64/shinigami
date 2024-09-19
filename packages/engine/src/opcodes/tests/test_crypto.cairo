@@ -1,7 +1,7 @@
 use crate::opcodes::tests::utils::{
     test_compile_and_run, check_expected_dstack, check_dstack_size,
     test_compile_and_run_with_tx_flags_err, mock_transaction_legacy_p2ms,
-    test_compile_and_run_with_tx_err, test_compile_and_run_with_tx, mock_transaction_legacy_p2pkh
+    test_compile_and_run_with_tx_err, test_compile_and_run_with_tx, mock_transaction_legacy_p2pkh, mock_transaction_witness_p2wpkh
 };
 use crate::errors::Error;
 use crate::scriptnum::ScriptNum;
@@ -263,6 +263,22 @@ fn test_op_checksig_valid() {
     let script_pubkey =
         "OP_DUP OP_HASH160 OP_DATA_20 0x4299ff317fcd12ef19047df66d72454691797bfc OP_EQUALVERIFY OP_CHECKSIG";
     let mut transaction = mock_transaction_legacy_p2pkh(script_sig);
+    let mut engine = test_compile_and_run_with_tx(script_pubkey, transaction);
+    check_dstack_size(ref engine, 1);
+    let expected_stack = array![ScriptNum::wrap(1)];
+    check_expected_dstack(ref engine, expected_stack.span());
+}
+
+#[test]
+fn test_op_checksig_witness_valid() {
+    let script_pubkey = "OP_0 OP_PUSHBYTES_20 8d7a0a3461e3891723e5fdf8129caa0075060cff";
+    let mut witness = ArrayTrait::new();
+	witness.append(2);
+
+
+3045022100a6e33a7aff720ba9f33a0a8346a16fdd022196862796d511d31978c40c9ad48b02206fb8f67bd699a8c952b3386a81d122c366d2d36cd08e2de21207e6aa6f96ce9501
+0283409659355b6d1cc3c32decd5d561abaac86c37a353b52895a5e6c196d6f448
+    let mut transaction = mock_transaction_witness_p2wpkh(witness);
     let mut engine = test_compile_and_run_with_tx(script_pubkey, transaction);
     check_dstack_size(ref engine, 1);
     let expected_stack = array![ScriptNum::wrap(1)];

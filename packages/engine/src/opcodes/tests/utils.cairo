@@ -160,6 +160,28 @@ pub fn mock_transaction_legacy_p2pkh(script_sig: ByteArray) -> Transaction {
     mock_transaction(script_sig)
 }
 
+// Mock transaction 'f91d0a8a78462bc59398f2c5d7a84fcff491c26ba54c4833478b202796c8aafd'
+// Witness P2WPKH
+pub fn mock_transaction_witness_p2wpkh(witness: Array<ByteArray>) -> Transaction {
+    let outpoint: OutPoint = OutPoint {
+        txid: 0xdfcec48bb8491856c353306ab5febeb7e99e4d783eedf3de98f3ee0812b92bad, vout: 0
+    };
+    let mut inputs = ArrayTrait::<TransactionInput>::new();
+    inputs.append(mock_transaction_input_with(outpoint, "", witness, 0xffffffff));
+
+    let mut outputs = ArrayTrait::<TransactionOutput>::new();
+    let output_script1_u256: u256 = 0x00148d7a0a3461e3891723e5fdf8129caa0075060cff;
+    let mut output_script1: ByteArray = "";
+    output_script1.append_word(output_script1_u256.high.into(), 9);
+    output_script1.append_word(output_script1_u256.low.into(), 16);
+
+    outputs.append(mock_transaction_output_with(81530, output_script1));
+    outputs.append(mock_transaction_output_with(81530, output_script1));
+	outputs.append(mock_transaction_output_with(0, "6a2342697462616e6b20496e632e204a6170616e20737570706f7274732053656757697421"));
+
+    return mock_transaction_with(1, inputs, outputs, 0);
+}
+
 // Mock transaction '949591ad468cef5c41656c0a502d9500671ee421fadb590fbc6373000039b693'
 // Legacy P2MS
 pub fn mock_transaction_legacy_p2ms(script_sig: ByteArray) -> Transaction {
