@@ -50,7 +50,7 @@ pub fn calc_signature_hash<
 }
 
 // Calculates the signature hash for a Segregated Witness (SegWit) transaction and hash type.
-pub fn calc_witness_transaction_hash(
+pub fn calc_witness_signature_hash(
     sub_script: @ByteArray, hash_type: u32, ref transaction: Transaction, index: u32, amount: i64
 ) -> u256 {
     let transaction_outputs_len: usize = transaction.transaction_outputs.len();

@@ -10,7 +10,7 @@ use shinigami_utils::byte_array::u256_from_byte_array_with_offset;
 use crate::signature::{sighash, constants};
 use crate::errors::Error;
 
-//`BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
+// `BaseSigVerifier` is used to verify ECDSA signatures encoded in DER or BER format (pre-SegWit sig)
 #[derive(Drop)]
 pub struct BaseSigVerifier {
     // public key as a point on the secp256k1 curve, used to verify the signature
@@ -367,7 +367,7 @@ pub fn parse_signature(sig_bytes: @ByteArray) -> Result<Signature, felt252> {
 
     let mut i = 0;
 
-    //Strip leading zero
+    // Strip leading zero
     while s_len != 0 && sig_bytes[i + r_len + 6] == 0x00 {
         sig_len -= 1;
         s_len -= 1;
