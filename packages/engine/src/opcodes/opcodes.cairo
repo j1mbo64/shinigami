@@ -197,6 +197,7 @@ pub mod Opcode {
     use crate::opcodes::{
         constants, flow, stack, splice, bitwise, arithmetic, crypto, locktime, utils
     };
+    use crate::parser::data_len;
 
     pub fn execute<
         T,
@@ -476,5 +477,51 @@ pub mod Opcode {
             return true;
         }
         return false;
+    }
+
+    pub fn is_success_opcode(opcode: u8) -> bool {
+        // TODO: To map
+        if opcode > 186 {
+            // OP_UNKNOWNX
+            return true;
+        }
+        if opcode == OP_RESERVED
+            || opcode == OP_VER
+            || opcode == OP_CAT
+            || opcode == OP_SUBSTR
+            || opcode == OP_LEFT
+            || opcode == OP_RIGHT
+            || opcode == OP_INVERT
+            || opcode == OP_AND
+            || opcode == OP_OR
+            || opcode == OP_XOR
+            || opcode == OP_RESERVED1
+            || opcode == OP_RESERVED2
+            || opcode == OP_2MUL
+            || opcode == OP_2DIV
+            || opcode == OP_MUL
+            || opcode == OP_DIV
+            || opcode == OP_MOD
+            || opcode == OP_LSHIFT
+            || opcode == OP_RSHIFT {
+            return true;
+        }
+        return false;
+    }
+
+    pub fn has_success_opcode(script: @ByteArray) -> bool {
+        let mut i: usize = 0;
+        let mut result = false;
+
+        while i < script.len() {
+            let opcode = script[i];
+            if is_success_opcode(opcode) {
+                result = true;
+                break;
+            }
+            let data_len = data_len(script, i).unwrap();
+            i += data_len + 1;
+        };
+        return result;
     }
 }
