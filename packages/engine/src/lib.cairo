@@ -3,6 +3,7 @@ pub mod parser;
 pub mod stack;
 pub mod cond_stack;
 pub mod witness;
+pub mod taproot;
 pub mod hash_cache;
 pub mod errors;
 pub mod opcodes {
@@ -26,7 +27,9 @@ pub mod signature {
     pub mod sighash;
     pub mod constants;
     pub mod utils;
-    pub use signature::{BaseSigVerifier, BaseSigVerifierTrait};
+    pub use signature::{
+        BaseSigVerifier, BaseSigVerifierTrait, TaprootSigVerifier, TaprootSigVerifierTrait
+    };
 }
 pub mod transaction;
 #[cfg(test)]
