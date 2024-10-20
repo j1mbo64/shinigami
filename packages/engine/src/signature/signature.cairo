@@ -387,15 +387,17 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     }
 }
 
-pub fn parse_schnorr_pub_key(pk_bytes: @ByteArray) -> Secp256k1Point {
-    if pk_bytes.len() == 0 || pk_bytes.len() != 32 {
-        // TODO
-        panic!("invalid schnorr pubkey length");
+pub fn parse_schnorr_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
+    if pk_bytes.len() == 0 {
+        return Result::Err(Error::TAPROOT_EMPTY_PUBKEY);
+    }
+    if pk_bytes.len() != 32 {
+        return Result::Err(Error::TAPROOT_INVALID_PUBKEY_SIZE);
     }
 
     let mut key_compressed: ByteArray = "\02";
     key_compressed.append(pk_bytes);
-    return parse_pub_key(@key_compressed).unwrap();
+    return Result::Ok(parse_pub_key(@key_compressed).unwrap());
 }
 
 // Parses a DER-encoded ECDSA signature byte array into a `Signature` struct.
@@ -663,3 +665,4 @@ pub impl TaprootSigVerifierImpl<
         return false;
     }
 }
+

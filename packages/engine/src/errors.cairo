@@ -36,6 +36,7 @@ pub mod Error {
     pub const CODESEPARATOR_NON_SEGWIT: felt252 = 'CODESEPARATOR in non-segwit';
     pub const TAPROOT_MULTISIG: felt252 = 'Multisig in taproot script';
     pub const TAPROOT_EMPTY_PUBKEY: felt252 = 'Empty pubkey in taproot script';
+    pub const TAPROOT_INVALID_PUBKEY_SIZE: felt252 = 'Bad pubkey size in tapscript';
     pub const TAPROOT_INVALID_CONTROL_BLOCK: felt252 = 'Invalid control block';
     pub const TAPROOT_INVALID_SIG: felt252 = 'Invalid signature in tap script';
     pub const TAPROOT_PARITY_MISMATCH: felt252 = 'Parity mismatch in tap script';
