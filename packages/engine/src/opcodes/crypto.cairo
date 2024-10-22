@@ -9,7 +9,7 @@ use crate::signature::sighash;
 use starknet::secp256_trait::{is_valid_signature};
 use core::num::traits::OverflowingAdd;
 use crate::signature::signature::{
-    BaseSigVerifierTrait, BaseSegwitSigVerifierTrait, TaprootSigVerifierTrait
+    BaseSigVerifierTrait, SegwitSigVerifierTrait, TaprootSigVerifierTrait
 };
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
 use crate::opcodes::utils;
@@ -104,7 +104,7 @@ pub fn opcode_checksig<
         }
 
         let mut sig_verifier = res.unwrap();
-        if BaseSegwitSigVerifierTrait::verify(ref sig_verifier, ref engine) {
+        if SegwitSigVerifierTrait::verify(ref sig_verifier, ref engine) {
             is_valid = true;
         } else {
             is_valid = false;
@@ -118,14 +118,14 @@ pub fn opcode_checksig<
 
         let mut verifier = TaprootSigVerifierTrait::<
             I, O, T
-        >::new(@full_sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
+        >::new(ref engine, @full_sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
         if !(TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier)) {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
         }
 
         let mut verifier = TaprootSigVerifierTrait::<
             I, O, T
-        >::new_base(@full_sig_bytes, @pk_bytes)?;
+        >::new_base(ref engine, @full_sig_bytes, @pk_bytes)?;
         is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier);
     }
 
@@ -423,7 +423,7 @@ pub fn opcode_checksigadd<
     // key size is zero, so we'll fail all script execution.
     let mut verifier = TaprootSigVerifierTrait::<
         I, O, T
-    >::new(@sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
+    >::new(ref engine, @sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
     if !(TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier)) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
