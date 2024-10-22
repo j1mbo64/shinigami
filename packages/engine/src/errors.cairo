@@ -45,6 +45,7 @@ pub mod Error {
     pub const TAPROOT_INVALID_MERKLE_PROOF: felt252 = 'Invalid taproot merkle proof';
     pub const SCHNORR_INVALID_SIG_SIZE: felt252 = 'Invalid schnorr sig size';
     pub const SCHNORR_INVALID_SIG_R_FIELD: felt252 = 'Schnorr sig r >= field';
+	pub const SCHNORR_INVALID_MSG_SIZE: felt252 = 'Schnorr invalid message size';
     pub const DISCOURAGE_OP_SUCCESS: felt252 = 'OP_SUCCESS is discouraged';
     pub const DISCOURAGE_UPGRADABLE_TAPROOT_VERSION: felt252 = 'Upgradable taproot version';
     pub const DISCOURAGE_UPGRADABLE_PUBKEY_TYPE: felt252 = 'Upgradable pubkey type';

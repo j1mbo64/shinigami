@@ -47,3 +47,23 @@ pub fn parse_schnorr_signature(sig_bytes: @ByteArray) -> Result<SchnorrSignature
     return Result::Ok(SchnorrSignature { r: r, s: s });
 }
 
+pub fn schnorr_is_valid_signature(sig: @SchnorrSignature, hash: @ByteArray, pubkey: @ByteArray) -> Result<bool, felt252> {
+
+
+
+	// step 1
+	if hash.len() != constants::SCHNORR_SCALARA_SIZE {
+		return Result::Err(Error::SCHNORR_INVALID_MSG_SIZE);
+	}
+
+	// step 2
+	let pk = parse_schnorr_pub_key(pubkey)?;
+
+
+
+	// step 5
+
+
+	// step 10
+	Result::Ok(true)
+}
