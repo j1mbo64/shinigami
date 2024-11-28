@@ -28,7 +28,11 @@ pub mod signature {
     pub mod sighash;
     pub mod constants;
     pub mod utils;
-    pub use signature::{BaseSigVerifier, BaseSigVerifierTrait};
+    pub mod schnorr;
+    pub use signature::{
+        BaseSigVerifier, BaseSigVerifierTrait, BaseSegwitSigVerifierTrait, TaprootSigVerifier,
+        TaprootSigVerifierTrait
+    };
 }
 pub mod transaction;
 #[cfg(test)]
