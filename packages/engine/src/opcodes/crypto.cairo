@@ -7,7 +7,7 @@ use crate::flags::ScriptFlags;
 use crate::signature::signature;
 use crate::signature::sighash;
 use crate::signature::signature::{
-    TaprootSigVerifier, BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait
+    BaseSigVerifierTrait, TaprootSigVerifierTrait, BaseSegwitSigVerifierTrait
 };
 use starknet::secp256_trait::{is_valid_signature};
 use shinigami_utils::hash::{sha256_byte_array, double_sha256_bytearray};
@@ -119,8 +119,8 @@ pub fn opcode_checksig<
         }
 
         // TODO: Errors or false?
-        let mut verifier = TaprootSigVerifierTrait::<T>::new_base(ref engine, @full_sig_bytes, @pk_bytes)?;
-        is_valid = TaprootSigVerifierTrait::<T>::verify(ref verifier);
+        let mut verifier = TaprootSigVerifierTrait::<I, O, T>::new_base(ref engine, @full_sig_bytes, @pk_bytes)?;
+        is_valid = TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier);
     }
 
     if !is_valid && @engine.use_taproot == @true {
@@ -410,8 +410,8 @@ pub fn opcode_checksigadd<
         return Result::Ok(());
     }
 
-    let mut verifier = TaprootSigVerifierTrait::<T>::new(ref engine, @sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
-    if !(TaprootSigVerifierTrait::<T>::verify(ref verifier)) {
+    let mut verifier = TaprootSigVerifierTrait::<I, O, T>::new(ref engine, @sig_bytes, @pk_bytes, engine.taproot_context.annex)?;
+    if !(TaprootSigVerifierTrait::<I, O, T>::verify(ref verifier)) {
         return Result::Err(Error::TAPROOT_INVALID_SIG);
     }
 

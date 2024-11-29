@@ -161,8 +161,8 @@ pub impl TaprootContextImpl of TaprootContextTrait {
             annex = witness[witness.len() - 1];
         }
 
-        let mut verifier = TaprootSigVerifierImpl::<T>::new(ref vm, raw_sig, witness_program, annex)?;
-        let is_valid = TaprootSigVerifierImpl::<T>::verify(ref verifier);
+        let mut verifier = TaprootSigVerifierImpl::<I, O, T>::new(ref vm, raw_sig, witness_program, annex)?;
+        let is_valid = TaprootSigVerifierImpl::<I, O, T>::verify(ref verifier);
         if !is_valid {
             return Result::Err(Error::TAPROOT_INVALID_SIG);
         }
