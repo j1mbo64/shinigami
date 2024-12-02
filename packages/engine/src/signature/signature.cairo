@@ -382,7 +382,7 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
         return Result::Ok(
             Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
                 .unwrap_syscall()
-                .expect('Secp256k1Point: Invalid point.')
+                .expect(Error::SECP256_INVALID_POINT)
         );
     } else {
         // Extract X coordinate and determine parity from last byte.
@@ -395,7 +395,7 @@ pub fn parse_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
         return Result::Ok(
             Secp256Trait::<Secp256k1Point>::secp256_ec_get_point_from_x_syscall(pub_key, parity)
                 .unwrap_syscall()
-                .expect('Secp256k1Point: Invalid point.')
+                .expect(Error::INVALID_PUBKEY_LEN)
         );
     }
 }

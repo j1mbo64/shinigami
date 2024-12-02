@@ -1,7 +1,9 @@
+use starknet::secp256_trait::Secp256PointTrait;
 use crate::errors::Error;
 use crate::signature::{constants, signature};
 use starknet::secp256k1::Secp256k1Point;
-use starknet::secp256_trait::Signature;
+use starknet::secp256_trait::{Secp256Trait, Signature};
+use crate::hash_tag::{HashTag, tagged_hash};
 
 pub fn parse_schnorr_pub_key(pk_bytes: @ByteArray) -> Result<Secp256k1Point, felt252> {
     if pk_bytes.len() == 0 {
@@ -42,6 +44,20 @@ pub fn parse_schnorr_signature(sig_bytes: @ByteArray) -> Result<Signature, felt2
     return Result::Ok(Signature { r: r, s: s, y_parity: false});
 }
 
-pub fn verify_schnorr() -> bool {
-	true
+pub fn verify_schnorr(sig: Signature, hash: ByteArray, pubkey: ByteArray) -> Result<bool, felt252>{
+	let _n = Secp256Trait::<Secp256k1Point>::get_curve_size();
+
+
+	if hash.len() != 32 {
+		return Result::Err('ERR');
+	}
+
+	let _pub = parse_schnorr_pub_key(@pubkey)?;
+	// Is on curve ?
+
+
+	let _tagged = tagged_hash();
+
+
+	return Result::Err('ERR');
 }
